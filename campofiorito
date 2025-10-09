@@ -1,0 +1,159 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <windows.h>
+using namespace std;
+#define BOMB 9
+int main()
+{
+    const char fullCell = '*';
+    const char emptyCell =' ';
+    const int boardSize = 9;
+    const int bombNumber = 10;
+
+    vector<char> boardVisual(boardSize*boardSize, fullCell);
+    vector<int> boardMemory(boardSize*boardSize, 0);
+
+    for(int i=0; i<bombNumber; i++)
+    {
+        int pos = rand() % (boardSize*boardSize); //Un numero random da 0 a 80
+        while(boardMemory.at(pos)==BOMB){
+            pos = rand() % (boardSize*boardSize);
+        }
+
+        boardMemory.at(pos) = BOMB;
+    }
+
+    for(int i=0; i<boardMemory.size(); i++){
+        if(boardMemory.at(i)==BOMB){
+            continue;
+        }
+
+        int row=i/boardSize;
+        int col=i%boardSize;
+
+        int numBomb = 0;
+        int pos;
+
+        if(row>=1){
+            if(col >= 1){
+                //Posso controllare row-1 col-1
+                pos = (row-1)*boardSize + (col-1);
+                numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            }
+            pos = (row-1)*boardSize + (col);
+            numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            if(col <= boardSize - 2){
+                pos = (row-1)*boardSize + (col+1);
+                numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            }
+        }
+        if(col >= 1){
+            pos = (row)*boardSize + (col-1);
+            numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+        }
+        if(col <= boardSize - 2){
+            pos = (row)*boardSize + (col+1);
+            numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+        }
+
+        if(row<=boardSize-2){
+            if(col >= 1){
+                //Posso controllare row-1 col-1
+                pos = (row+1)*boardSize + (col-1);
+                numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            }
+            pos = (row+1)*boardSize + (col);
+            numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            if(col <= boardSize - 2){
+                pos = (row+1)*boardSize + (col+1);
+                numBomb += boardMemory.at(pos)==BOMB ? 1 : 0;
+            }
+        }
+
+        boardMemory.at(i)=numBomb;
+    }
+
+    while(true){
+
+        cout << "  ";
+        for(int i=0; i<boardSize; i++){
+            cout << i;
+        }
+        cout << endl;
+        for(int i=0; i<boardSize+2; i++){
+            cout << '_';
+        }
+        cout << endl << 0 << '|';
+        for(int i=0; i<boardVisual.size(); i++)
+        {
+            cout << boardVisual.at(i);
+            if ((i+1)%boardSize==0){
+                cout << endl;
+                if (i < 80){
+                    cout << (i+1) / 9 << '|';
+                }
+            }
+        }
+
+        cout << "Inserisci riga e colonna: ";
+        int col, row;
+        cin >> row >> col;
+        if(boardMemory.at(row*boardSize+col)==BOMB){
+            cout << "KABOOM RICO!";
+            break;
+        }
+        else
+        {
+            vector<int> vicini(0);
+            vicini.push_back(row*boardSize+col);
+
+
+            while(vicini.size()!=0)
+            {
+                int pos = vicini.back();
+
+                vicini.pop_back();
+                if(boardMemory.at(pos)!=0){
+                    boardVisual.at(pos)=boardMemory.at(pos)+'0';
+                }
+                else if(boardVisual.at(pos)==emptyCell){
+                    continue;
+                }
+                else
+                {
+                    boardVisual.at(pos)=emptyCell;
+                    row = pos / boardSize;
+                    col = pos % boardSize;
+                    if(row>=1)
+                    {
+                        if(col >= 1){
+                            vicini.push_back((row-1)*boardSize + (col-1));
+                        }
+                        vicini.push_back((row-1)*boardSize + (col));
+                        if(col <= boardSize - 2){
+                            vicini.push_back((row-1)*boardSize + (col+1));
+                        }
+                    }
+                    if(col >= 1){
+                        vicini.push_back((row)*boardSize + (col-1));
+                    }
+                    if(col <= boardSize - 2){
+                        vicini.push_back((row)*boardSize + (col+1));
+                    }
+
+                    if(row<=boardSize-2){
+                        if(col >= 1){
+                            vicini.push_back((row+1)*boardSize + (col-1));
+                        }
+                        vicini.push_back((row+1)*boardSize + (col));
+                        if(col <= boardSize - 2){
+                            vicini.push_back((row+1)*boardSize + (col+1));
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}
